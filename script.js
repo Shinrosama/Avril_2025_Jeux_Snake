@@ -8,7 +8,10 @@ window.onload = function()
     let ctx;
 // on définit le délai entre chaque déplacement du serpent en milisecondes    
     let delay = 100;
+//on crée la variable du serpent
     let snakee;
+//on crée la variable de la pomme 
+    let applee;
 //on appelle la fonction init
     init();
 // on crée la fonction init qui définit l'état de base de la page
@@ -27,6 +30,7 @@ window.onload = function()
         ctx = canvas.getContext("2d");
         // on a defini le serpent de base qui a une taille de 3 blocs
         snakee = new snake([[6,4],[5,4],[4,4]], "right");
+        applee = new apple([10, 10]);
         refreshCanvas();
     
     }
@@ -37,6 +41,7 @@ window.onload = function()
         ctx.clearRect(0,0,canvasWidth, canvasHeight);
         snakee.advance();    
         snakee.draw();
+        applee.draw();
         setTimeout(refreshCanvas, delay);
     }
 
@@ -131,6 +136,32 @@ window.onload = function()
             {
                 this.direction = newDirection;
             }
+        }
+    }
+
+    //on veu créer la pomme
+    function apple(position)
+    {
+        this.position = position;
+        this.draw = function()
+        {
+            //on sauvegarde la configuration actuelle du contexte
+            ctx.save();
+            //on donne la couleur a utiliser
+            ctx.fillStyle = "#33cc33"
+            //on definit la création de la pomme qui est un rond
+            ctx.beginPath();
+            //on lui donne son rayon qui est égale a la moitié d'un bloc (taille du bloc divisé par deux)
+            let radius = blockSize/2;
+            //pour définir la position d'un cercle on se base sur son centre d'ou la position du bloc plus le rayon
+            let x = position[0]*blockSize + radius;
+            let y = position[1]*blockSize + radius;
+            //on utilise la fonction qui permet de dessiner un cercle 
+            ctx.arc(x, y, radius, 0, Math.PI*2, true)
+            //on rempli le cercle de la couleur choisie
+            ctx.fill()
+            // on restaure le contexte précédemment sauvé
+            ctx.restore();
         }
     }
 //on veu créer un évenement quand l'utilisateur appuie sur une touche de son clavier
