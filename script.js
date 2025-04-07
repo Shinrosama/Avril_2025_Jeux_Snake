@@ -12,6 +12,10 @@ window.onload = function()
     let snakee;
 //on crée la variable de la pomme 
     let applee;
+//on définit les dimencions de l'espace de jeux en blocs (une grille en blocs de 30 pixels)    
+    let widthInBlocks = canvasWidth/blockSize;
+    let heightInBlocks = canvasHeight/blockSize;
+
 //on appelle la fonction init
     init();
 // on crée la fonction init qui définit l'état de base de la page
@@ -37,12 +41,21 @@ window.onload = function()
 // on définit la fonction qui met a jours la progression du jeux 
     function refreshCanvas()
     {
-    
-        ctx.clearRect(0,0,canvasWidth, canvasHeight);
-        snakee.advance();    
-        snakee.draw();
-        applee.draw();
-        setTimeout(refreshCanvas, delay);
+        //on fait avancer le serpent    
+        snakee.advance();
+
+        if(snakee.checkColision())
+        {
+            //game over
+        }
+        else
+        {
+            ctx.clearRect(0,0,canvasWidth, canvasHeight);
+            snakee.draw();
+            applee.draw();
+            setTimeout(refreshCanvas, delay);
+        }
+
     }
 
 // on crée une fontion pris prend en compte le contexte et la position d'un bloc (corps du serpent)
@@ -136,6 +149,44 @@ window.onload = function()
             {
                 this.direction = newDirection;
             }
+        }
+        //on crée une fonction comme une methode pour verifier les colision
+        this.checkColision = function()
+        {
+            //on détermine la colision avec les murs
+            let wallColision = false;
+            //on détermine la colision avec le corps du serpent
+            let snakeColision = false;
+            //on défini la tête du serpent
+            let head = this.body[0];
+            //on défini le corps du serpent
+            let rest = this.body.slice(1);
+            //on tétaille le x et le y de la tête
+            let snakeX = head[0];
+            let snakeY = head[1];
+            // on détermine les coordonées minimales et maximales permises
+            let minX = 0;
+            let minY = 0;
+            let maxX = widthInBlocks - 1;
+            let maxY = heightInBlocks - 1;
+            //on crée une variable pour verifier si la tête n'est pas dans l'espace de jeux
+            let isNotBetweenHorizontalWalls = snakeX < minX || snakeX > maxX;
+            let isNotBetweenHorVerticalWalls = snakeY < minY || snakeY > maxY;
+            // on détermine les conditions pour savoir si il y a colision
+            if(isNotBetweenHorizontalWalls || isNotBetweenHorVerticalWalls)
+            {
+                wallColision = true;
+            }
+            /*pour verifier les cilisions de la tête avec le corps, on verifie si les coordonnées 
+            de la tête correspondent a celles d'un des éléments du reste du corp*/
+            for(let i = 0; i < rest.length; i++)
+            {
+                if(snakeX === rest[i][0] && snakeY === rest[i][1])
+                {
+                   snakeColision = true; 
+                }
+            }
+            return wallColision || snakeColision;
         }
     }
 
