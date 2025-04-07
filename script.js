@@ -50,6 +50,15 @@ window.onload = function()
         }
         else
         {
+            if(snakee.isEatingApple(applee))
+            {
+                snakee.ateApple = true;
+                do
+                {
+                   applee.setNewPosition();
+                }
+                while(applee.isOnSnake(snakee)) 
+            }
             ctx.clearRect(0,0,canvasWidth, canvasHeight);
             snakee.draw();
             applee.draw();
@@ -58,7 +67,7 @@ window.onload = function()
 
     }
 
-// on crée une fontion pris prend en compte le contexte et la position d'un bloc (corps du serpent)
+// on crée une fontion pris prend en compte le contexte et la position d'un bloc (corps du serpent)eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
     function drawBlock(ctx, position)
     {
         //en pixels on prends la position (dans le tableau) qu'on multiplie par la taille du bloc
@@ -73,7 +82,8 @@ window.onload = function()
         this.body = body;
         //on definit une nouvelle propriété de directions pour le serpent
         this.direction = direction;
-
+        //on defini si il a mangé une pome
+        this.ateApple = false;
         //on crée une methode pour dessiner le corps du serpent
         this.draw = function()
         {
@@ -114,14 +124,19 @@ window.onload = function()
                     break;
                 default:
                     throw("invalid direction");
-
-                
-
             }
             //on rajoute au debut du corps du serpent la nouvelle position (le serpent est plus long d'un élément)
             this.body.unshift(nextPosition);
-            // on retire le dernier ellémént du tableau ( pour conserver la taille du serpent)
-            this.body.pop();
+
+            if (!this.ateApple)
+            {
+              // on retire le dernier ellémént du tableau ( pour conserver la taille du serpent)
+                this.body.pop();   
+            }
+            else
+            {
+                this.ateApple = false;    
+            }
         }
         //on crée une nouvelle méthode pour donner au serpent sa direction (toute direction n'est pas permise en fonction de la postion du serpent)
         this.setDirection = function(newDirection)
@@ -187,6 +202,17 @@ window.onload = function()
                 }
             }
             return wallColision || snakeColision;
+        };
+        // on verifi si le serpent est entrain de manger une pomme, on donne en argument les coordonées d'une pomme
+        this.isEatingApple = function(appleToEat)
+        {
+            //on definit la tete dont la position est egale au corps a la position 0
+            let head = this.body[0];
+            //on verifie que les coordonées x et y de la tête du serpent sent egales aux coordonées x et y de la pomme
+            if (head[0] === appleToEat.position[0] && head[1] === appleToEat.position[1])
+                return true;
+            else
+                return false; 
         }
     }
 
@@ -205,14 +231,38 @@ window.onload = function()
             //on lui donne son rayon qui est égale a la moitié d'un bloc (taille du bloc divisé par deux)
             let radius = blockSize/2;
             //pour définir la position d'un cercle on se base sur son centre d'ou la position du bloc plus le rayon
-            let x = position[0]*blockSize + radius;
-            let y = position[1]*blockSize + radius;
+            let x = this.position[0]*blockSize + radius;
+            let y = this.position[1]*blockSize + radius;
             //on utilise la fonction qui permet de dessiner un cercle 
             ctx.arc(x, y, radius, 0, Math.PI*2, true)
             //on rempli le cercle de la couleur choisie
             ctx.fill()
             // on restaure le contexte précédemment sauvé
             ctx.restore();
+        }
+        this.setNewPosition = function()
+        {
+            /*on utilise math.random pour obtenir un nombre aléatoire entre 0 et 1
+            les valeurs du random n'étant pas forcement des nombre entier on utilise Math.round pour arondir
+            on multiplie le résultat par le nombre de blocs -1
+            */
+            let newX = Math.round(Math.random() * (widthInBlocks - 1))
+            let newY = Math.round(Math.random() * (heightInBlocks - 1))
+            this.position = [newX, newY]
+        }
+        //on veut eviter que la pomme apparaisse sur le serpent
+        this.isOnSnake = function(snakeToCheck)
+        {
+            let isOnSnake = false;
+            //on verifie si la pomme est sur un bloc du serpent
+            for(let i = 0; i < snakeToCheck.body.length; i++)
+            {
+                if(this.position[0] === snakeToCheck.body[i][0] && this.position[1] === snakeToCheck.body[i][1])
+                {
+                    isOnSnake = true;
+                }
+            }
+            return isOnSnake;
         }
     }
 //on veu créer un évenement quand l'utilisateur appuie sur une touche de son clavier
