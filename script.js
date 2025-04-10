@@ -15,7 +15,7 @@ window.onload = function()
 //on définit les dimencions de l'espace de jeux en blocs (une grille en blocs de 30 pixels)    
     let widthInBlocks = canvasWidth/blockSize;
     let heightInBlocks = canvasHeight/blockSize;
-
+    let score;
 //on appelle la fonction init
     init();
 // on crée la fonction init qui définit l'état de base de la page
@@ -35,6 +35,7 @@ window.onload = function()
         // on a defini le serpent de base qui a une taille de 3 blocs
         snakee = new snake([[6,4],[5,4],[4,4]], "right");
         applee = new apple([10, 10]);
+        score = 0;
         refreshCanvas();
     
     }
@@ -46,12 +47,14 @@ window.onload = function()
 
         if(snakee.checkColision())
         {
-            //game over
+            gameOver()
+          
         }
         else
         {
             if(snakee.isEatingApple(applee))
             {
+                score++;
                 snakee.ateApple = true;
                 do
                 {
@@ -62,11 +65,33 @@ window.onload = function()
             ctx.clearRect(0,0,canvasWidth, canvasHeight);
             snakee.draw();
             applee.draw();
+            drawScore();
             setTimeout(refreshCanvas, delay);
         }
 
     }
+    function gameOver()
+    {
+        ctx.save();
+        ctx.fillText("Game Over", 5, 15);
+        ctx.fillText("Appuyez sur la touche espace pour rejouer", 5, 30);
+        ctx.restore();
+    }
 
+    function restart()
+    { 
+        snakee = new snake([[6,4],[5,4],[4,4]], "right");
+        applee = new apple([10, 10]);
+        score = 0;
+        refreshCanvas();
+    }
+
+    function drawScore()
+    {
+        ctx.save();
+        ctx.fillText(score.toString(), 5, canvasHeight -5);
+        ctx.restore();
+    }
 // on crée une fontion pris prend en compte le contexte et la position d'un bloc (corps du serpent)eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
     function drawBlock(ctx, position)
     {
@@ -287,6 +312,9 @@ window.onload = function()
             case 40:
                 newDirection = "down";
                 break;
+            case 32:
+                restart();
+                return;
             //si aucune des situations précédentes ne se produit alors on reviens au début
             default:
                 return;
